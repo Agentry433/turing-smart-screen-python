@@ -1,0 +1,7 @@
+name: theme_SHUPING
+source_vendor_theme: theme_SHUPING
+source_ui: /tmp/smartmonitor_unpacked/app/themefor3.5/theme_SHUPING/SHUPING.ui
+compiled_at: '2026-04-14T10:12:00.951713+00:00'
+compiler: experimental_ui_to_imgdat
+size: 330471
+sha256: 99c69a109e78839387dc4fc7b112f6469f9565e1ccef9896253f221a96644e16

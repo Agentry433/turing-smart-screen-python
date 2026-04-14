@@ -1,0 +1,8 @@
+name: theme_computer case
+source_vendor_theme: theme_computer case
+source_ui: /tmp/smartmonitor_unpacked/app/themefor3.5/theme_computer case/computer
+  case.ui
+compiled_at: '2026-04-14T10:12:01.006896+00:00'
+compiler: experimental_ui_to_imgdat
+size: 319401
+sha256: 46a7cae7e019395d2c390175f525123429dc6d7818379b7513b21bfa1a3cb50a

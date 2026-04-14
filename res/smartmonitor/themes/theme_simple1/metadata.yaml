@@ -1,0 +1,7 @@
+name: theme_simple1
+source_vendor_theme: theme_simple1
+source_ui: /tmp/smartmonitor_unpacked/app/themefor3.5/theme_simple1/simple1.ui
+compiled_at: '2026-04-14T10:12:03.180055+00:00'
+compiler: experimental_ui_to_imgdat
+size: 1425035
+sha256: cd4f06bfb3321f59095b841c50055ec1b7537b80bbcc8ea94367fb8b65bd62ff

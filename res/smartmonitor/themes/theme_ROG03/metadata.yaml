@@ -1,0 +1,7 @@
+name: theme_ROG03
+source_vendor_theme: theme_ROG03
+source_ui: /tmp/smartmonitor_unpacked/app/themefor3.5/theme_ROG03/ROG03.ui
+compiled_at: '2026-04-14T10:12:00.891824+00:00'
+compiler: experimental_ui_to_imgdat
+size: 329334
+sha256: 107da5d609e40105fce1307a4aef906743e2308cc3fb0ba29ea2375547c896cf
