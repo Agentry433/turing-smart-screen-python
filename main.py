@@ -55,8 +55,8 @@ try:
 
 except Exception as e:
     print("""Import error: %s
-Please follow start guide to install required packages: https://github.com/mathoudebine/turing-smart-screen-python/wiki/System-monitor-:-how-to-start
-Or the troubleshooting page: https://github.com/mathoudebine/turing-smart-screen-python/wiki/Troubleshooting#all-os-tkinter-dependency-not-installed""" % str(
+Please see README.md / README_RU.md in the repository root for installation steps.
+If the application still does not start, check repository issues or discussions.""" % str(
         e))
     try:
         sys.exit(0)

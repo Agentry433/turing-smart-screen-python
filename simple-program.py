@@ -53,7 +53,7 @@ COM_PORT = "AUTO"
 # - C      for Turing 5"
 # - D      for Kipye Qiye Smart Display 3.5"
 # - SIMU   for simulated display (image written in screencap.png)
-# To identify your smart screen: https://github.com/mathoudebine/turing-smart-screen-python/wiki/Hardware-revisions
+# For hardware identification guidance, see README.md / README_RU.md in the repository root.
 REVISION = "A_HID"
 
 # Display width & height in pixels for portrait orientation

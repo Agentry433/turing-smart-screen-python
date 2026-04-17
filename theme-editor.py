@@ -37,8 +37,7 @@ try:
     import tkinter
     from PIL import ImageTk, Image
 except:
-    print(
-        "[ERROR] Tkinter dependency not installed. Please follow troubleshooting page: https://github.com/mathoudebine/turing-smart-screen-python/wiki/Troubleshooting#all-os-tkinter-dependency-not-installed")
+    print("[ERROR] Tkinter dependency not installed. See README.md / README_RU.md in the repository root.")
     try:
         sys.exit(0)
     except:

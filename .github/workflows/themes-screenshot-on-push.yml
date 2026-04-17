@@ -11,7 +11,7 @@ jobs:
     name: Update themes screenshot and generate list
 
     # Don't run this action on forked repositories to avoid conflicts in PR...
-    if: github.repository == 'mathoudebine/turing-smart-screen-python'
+    if: github.repository == 'Agentry433/turing-smart-screen-python'
     
     runs-on: ubuntu-latest
 

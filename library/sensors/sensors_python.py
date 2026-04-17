@@ -250,7 +250,7 @@ class Gpu(sensors.Gpu):
             DETECTED_GPU = GpuType.UNSUPPORTED
             if sys.version_info >= (3, 11) and (platform.system() == "Linux" or platform.system() == "Darwin"):
                 logger.warning("If you have an AMD GPU, you may need to install some  libraries manually: see "
-                               "https://github.com/mathoudebine/turing-smart-screen-python/wiki/Troubleshooting#linux--macos-no-supported-gpu-found-with-an-amd-gpu-and-python-311")
+                               "See README.md / README_RU.md in the repository root for AMD GPU setup notes.")
 
         return DETECTED_GPU != GpuType.UNSUPPORTED
 
