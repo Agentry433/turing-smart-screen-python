@@ -1,0 +1,58 @@
+# SmartMonitor HID Edition
+
+This repository is a modified fork of `turing-smart-screen-python` with added support for 3.5" SmartMonitor devices that appear on Linux as USB HID (`0483:0065`) instead of serial/TTY displays.
+
+## Features
+
+- Linux `hidraw` backend for SmartMonitor
+- Theme upload over HID/YMODEM
+- Live runtime metrics for CPU, GPU, RAM, disk and network
+- Vendor theme support (`.dat`)
+- Vendor UI conversion (`.ui -> .dat`)
+- SmartMonitor GUI integration in `configure.py`
+- Dedicated SmartMonitor theme editor with 480x320 canvas preview
+
+## Main Files
+
+- `main.py` — start the monitor runtime
+- `configure.py` — GUI configuration, theme selection, import and conversion
+- `smartmonitor-theme-editor.py` — SmartMonitor UI editor
+- `tools/smartmonitor-theme-manager.py` — CLI theme manager
+
+## Recommended First Theme
+
+For the most stable out-of-the-box setup, use:
+
+- `res/themes/rog03-vendor.dat`
+
+## Quick Start
+
+```bash
+python3 -m venv venv
+source venv/bin/activate
+pip install -r requirements.txt
+python3 configure.py
+```
+
+Then:
+
+1. Select `SmartMonitor HID (experimental)`
+2. Select a theme
+3. Click `Save and run`
+
+## Licensing
+
+The original project is licensed under `GNU GPL v3`.
+
+That means this fork can be modified and redistributed, but:
+
+- the GPL-3.0 license must be preserved
+- copyright and license notices must remain intact
+- modified versions must be clearly marked as modified
+- source code for distributed modifications must remain available under GPL terms
+
+See [LICENSE](./LICENSE).
+
+## Russian Documentation
+
+Russian overview and usage notes are available in [README_RU.md](./README_RU.md).
