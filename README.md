@@ -56,3 +56,15 @@ See [LICENSE](./LICENSE).
 ## Russian Documentation
 
 Russian overview and usage notes are available in [README_RU.md](./README_RU.md).
+
+## 💰 Support the Project
+
+If you find this project useful, you can support the development with a donation:
+
+TON Wallet:
+
+`UQD-RzivaF2yxBF81Zzf44WE84Y3pS24QL751Z5nYC3PosRJ`
+
+Donate TON
+
+Every donation helps keep the project alive and motivates further development. Thank you! ❤️
