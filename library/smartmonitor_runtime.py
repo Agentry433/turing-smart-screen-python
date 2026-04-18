@@ -84,15 +84,44 @@ def _theme_metadata(theme_stem: str) -> dict | None:
 
 
 @lru_cache(maxsize=32)
-def _theme_bundle(theme_stem: str):
+def _resolve_theme_source_ui_path(theme_stem: str) -> Path | None:
     metadata = _theme_metadata(theme_stem)
     if not isinstance(metadata, dict):
         return None
+
     source_ui = metadata.get("source_ui")
-    if not source_ui:
-        return None
-    source_ui_path = Path(source_ui)
-    if not source_ui_path.is_file():
+    if source_ui:
+        source_ui_path = Path(source_ui).expanduser()
+        if source_ui_path.is_file():
+            return source_ui_path
+
+    vendor_theme = metadata.get("source_vendor_theme")
+    candidate_dirs: list[Path] = []
+    if vendor_theme:
+        candidate_dirs.extend([
+            Path(config.MAIN_DIRECTORY) / "vendor" / "themefor3.5" / str(vendor_theme),
+            Path(config.MAIN_DIRECTORY) / "WIND" / "3.5 Inch SmartMonitor" / "themefor3.5" / str(vendor_theme),
+        ])
+
+    candidate_dirs.extend([
+        Path(config.MAIN_DIRECTORY) / "res" / "smartmonitor" / "projects" / theme_stem,
+        Path(config.MAIN_DIRECTORY) / "res" / "smartmonitor" / "themes" / theme_stem,
+    ])
+
+    for directory in candidate_dirs:
+        if not directory.is_dir():
+            continue
+        ui_files = sorted(directory.glob("*.ui"))
+        if ui_files:
+            return ui_files[0]
+
+    return None
+
+
+@lru_cache(maxsize=32)
+def _theme_bundle(theme_stem: str):
+    source_ui_path = _resolve_theme_source_ui_path(theme_stem)
+    if source_ui_path is None:
         return None
     try:
         from library.smartmonitor_ui import parse_theme_bundle
@@ -197,11 +226,17 @@ def _active_theme_runtime_supported() -> bool:
 
     if metadata.get("compiler") != "experimental_ui_to_imgdat":
         return True
-
-    theme_bundle = _theme_bundle(theme_stem)
-    if theme_bundle is None:
+    if not bool(_display_config().get("SMARTMONITOR_HID_ALLOW_EXPERIMENTAL_RUNTIME", True)):
         return False
-    return bool(_display_config().get("SMARTMONITOR_HID_ALLOW_EXPERIMENTAL_RUNTIME", True))
+    if _theme_bundle(theme_stem) is not None:
+        return True
+    if _tag_mapping():
+        return True
+    logger.warning(
+        "SmartMonitor theme '%s' has no resolved source UI for runtime mapping; using best-effort runtime mode",
+        _active_theme_name(),
+    )
+    return True
 
 
 def _post_upload_runtime_delay() -> float:

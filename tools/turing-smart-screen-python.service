@@ -1,32 +1,23 @@
 [Unit]
-Description=Turing Smart Screen
-Requires=network-online.target
-After=network-online.target
+Description=Turing Smart Screen Python HIDdev
+After=graphical-session.target network-online.target
+Wants=graphical-session.target network-online.target
 
 [Service]
 Type=simple
 
-; Don't forget to change the value here!
-; There is no reason to run this program as root, just use your username
-User=YOUR_USERNAME_HERE
+; Recommended usage:
+; 1. Copy this file to ~/.config/systemd/user/turing-smart-screen-python.service
+; 2. Replace WorkingDirectory and ExecStart with your paths
+; 3. Run:
+;    systemctl --user daemon-reload
+;    systemctl --user enable --now turing-smart-screen-python.service
 
-; If you want to put the program in your home directory instead, remove 'ProtectHome=read-only' line below
-WorkingDirectory=/opt/turing-smart-screen-python/
-
-ExecStart=python3 main.py
-
-; Always restart the script
-Restart=always
-
-; cf. https://www.darkcoding.net/software/the-joy-of-systemd/
-; /usr, /boot and /etc are read-only
-ProtectSystem=full
-; $HOME is read only ..
-ProtectHome=read-only
-; /tmp is isolated from all other processes
-PrivateTmp=true
-; Don't allow process to raise privileges (e.g. disable suid)
-NoNewPrivileges=true
+WorkingDirectory=/absolute/path/to/turing-smart-screen-python-main
+ExecStart=/absolute/path/to/python /absolute/path/to/turing-smart-screen-python-main/main.py
+Restart=on-failure
+RestartSec=3
+Environment=PYTHONUNBUFFERED=1
 
 [Install]
-WantedBy=multi-user.target
+WantedBy=default.target

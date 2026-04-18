@@ -133,6 +133,7 @@ weather_lang_map = {"sq": "Albanian", "af": "Afrikaans", "ar": "Arabic", "az": "
 MAIN_DIRECTORY = str(Path(__file__).parent.resolve()) + "/"
 THEMES_DIR = MAIN_DIRECTORY + 'res/themes'
 SMARTMONITOR_THEMES_DIR = MAIN_DIRECTORY + 'res/smartmonitor/themes'
+AUTOSTART_SERVICE_NAME = "turing-smart-screen-python.service"
 DEFAULT_SMARTMONITOR_VENDOR_THEME_ROOT = (
     os.path.join(MAIN_DIRECTORY, "vendor", "themefor3.5")
     if os.path.isdir(os.path.join(MAIN_DIRECTORY, "vendor", "themefor3.5"))
@@ -335,6 +336,81 @@ def sanitize_smartmonitor_theme_name(name: str) -> str:
         else:
             safe.append("_")
     return "".join(safe).strip()
+
+
+def autostart_supported() -> bool:
+    return platform.system() == "Linux"
+
+
+def autostart_service_dir() -> Path:
+    return Path.home() / ".config" / "systemd" / "user"
+
+
+def autostart_service_path() -> Path:
+    return autostart_service_dir() / AUTOSTART_SERVICE_NAME
+
+
+def render_autostart_service() -> str:
+    python_exec = Path(sys.executable).resolve()
+    main_script = Path(MAIN_DIRECTORY) / "main.py"
+    working_dir = Path(MAIN_DIRECTORY).resolve()
+    return "\n".join([
+        "[Unit]",
+        "Description=Turing Smart Screen Python HIDdev",
+        "After=graphical-session.target network-online.target",
+        "Wants=graphical-session.target network-online.target",
+        "",
+        "[Service]",
+        "Type=simple",
+        f"WorkingDirectory={working_dir}",
+        f"ExecStart={python_exec} {main_script}",
+        "Restart=on-failure",
+        "RestartSec=3",
+        "Environment=PYTHONUNBUFFERED=1",
+        "",
+        "[Install]",
+        "WantedBy=default.target",
+        "",
+    ])
+
+
+def write_autostart_service_file() -> Path:
+    service_dir = autostart_service_dir()
+    service_dir.mkdir(parents=True, exist_ok=True)
+    service_path = autostart_service_path()
+    service_path.write_text(render_autostart_service(), encoding="utf-8")
+    return service_path
+
+
+def is_autostart_enabled() -> bool:
+    if not autostart_supported():
+        return False
+    try:
+        result = subprocess.run(
+            ["systemctl", "--user", "is-enabled", AUTOSTART_SERVICE_NAME],
+            stdout=subprocess.PIPE,
+            stderr=subprocess.PIPE,
+            text=True,
+            check=False,
+        )
+        return result.returncode == 0 and result.stdout.strip() == "enabled"
+    except Exception:
+        return autostart_service_path().is_file()
+
+
+def enable_autostart_service():
+    service_path = write_autostart_service_file()
+    subprocess.run(["systemctl", "--user", "daemon-reload"], check=True)
+    subprocess.run(["systemctl", "--user", "enable", "--now", AUTOSTART_SERVICE_NAME], check=True)
+    return service_path
+
+
+def disable_autostart_service():
+    subprocess.run(["systemctl", "--user", "disable", "--now", AUTOSTART_SERVICE_NAME], check=False)
+    service_path = autostart_service_path()
+    if service_path.exists():
+        service_path.unlink()
+    subprocess.run(["systemctl", "--user", "daemon-reload"], check=False)
 
 
 def smartmonitor_theme_dir(name: str) -> str:
@@ -751,11 +827,25 @@ class TuringConfigWindow:
         )
         self.new_ui_btn.place(x=570, y=520, height=50, width=100)
 
+        self.autostart_enable_btn = ttk.Button(
+            self.window,
+            text="Enable\nautostart",
+            command=lambda: self.on_enable_autostart_click(),
+        )
+        self.autostart_enable_btn.place(x=680, y=520, height=50, width=100)
+
+        self.autostart_disable_btn = ttk.Button(
+            self.window,
+            text="Disable\nautostart",
+            command=lambda: self.on_disable_autostart_click(),
+        )
+        self.autostart_disable_btn.place(x=790, y=520, height=50, width=100)
+
         self.save_btn = ttk.Button(self.window, text="Save settings", command=lambda: self.on_save_click())
-        self.save_btn.place(x=680, y=520, height=50, width=110)
+        self.save_btn.place(x=900, y=520, height=50, width=110)
 
         self.save_run_btn = ttk.Button(self.window, text="Save and run", command=lambda: self.on_saverun_click())
-        self.save_run_btn.place(x=800, y=520, height=50, width=110)
+        self.save_run_btn.place(x=1020, y=520, height=50, width=110)
 
         self.config = None
         self.load_config_values()
@@ -790,6 +880,7 @@ class TuringConfigWindow:
             self.theme_cb.set("")
         elif self.theme_cb.get() not in themes:
             self.theme_cb.set(themes[0])
+        self.refresh_autostart_buttons()
 
     def load_theme_preview(self):
         if self.is_smartmonitor_model():
@@ -1038,6 +1129,66 @@ class TuringConfigWindow:
 
     def on_save_click(self):
         self.save_config_values()
+
+    def refresh_autostart_buttons(self):
+        if not autostart_supported():
+            self.autostart_enable_btn.state(["disabled"])
+            self.autostart_disable_btn.state(["disabled"])
+            return
+
+        enabled = is_autostart_enabled()
+        if enabled:
+            self.autostart_enable_btn.state(["disabled"])
+            self.autostart_disable_btn.state(["!disabled"])
+        else:
+            self.autostart_enable_btn.state(["!disabled"])
+            self.autostart_disable_btn.state(["disabled"])
+
+    def on_enable_autostart_click(self):
+        if not autostart_supported():
+            messagebox.showinfo("Autostart", "Autostart via systemd --user is available only on Linux.", parent=self.window)
+            return
+
+        try:
+            service_path = enable_autostart_service()
+        except subprocess.CalledProcessError as exc:
+            messagebox.showerror(
+                "Autostart failed",
+                "Could not enable autostart via systemd --user.\n\n"
+                f"Service file:\n{autostart_service_path()}\n\n"
+                f"Error: {exc}",
+                parent=self.window,
+            )
+            return
+        except Exception as exc:
+            messagebox.showerror("Autostart failed", str(exc), parent=self.window)
+            return
+
+        self.refresh_autostart_buttons()
+        messagebox.showinfo(
+            "Autostart enabled",
+            "Autostart has been enabled for the current user.\n\n"
+            f"Service file:\n{service_path}",
+            parent=self.window,
+        )
+
+    def on_disable_autostart_click(self):
+        if not autostart_supported():
+            messagebox.showinfo("Autostart", "Autostart via systemd --user is available only on Linux.", parent=self.window)
+            return
+
+        try:
+            disable_autostart_service()
+        except Exception as exc:
+            messagebox.showerror("Autostart disable failed", str(exc), parent=self.window)
+            return
+
+        self.refresh_autostart_buttons()
+        messagebox.showinfo(
+            "Autostart disabled",
+            "Autostart has been disabled for the current user.",
+            parent=self.window,
+        )
 
     def stop_running_main_instances(self):
         main_scripts = {
