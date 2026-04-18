@@ -72,6 +72,7 @@ except:
 MAIN_DIRECTORY = str(Path(__file__).parent.resolve()) + "/"
 
 if __name__ == "__main__":
+    _STOP_REQUESTED = False
 
     # Apply system locale to this program
     locale.setlocale(locale.LC_ALL, '')
@@ -91,6 +92,11 @@ if __name__ == "__main__":
         logger.debug("(Waited %.1fs)" % wait_time)
 
     def clean_stop(tray_icon=None):
+        global _STOP_REQUESTED
+        if _STOP_REQUESTED:
+            return
+        _STOP_REQUESTED = True
+
         # Turn screen and LEDs off before stopping
         if not smartmonitor_runtime.is_enabled():
             display.turn_off()
@@ -99,15 +105,25 @@ if __name__ == "__main__":
         # Instead, ask the scheduler to empty the action queue before stopping
         scheduler.STOPPING = True
 
-        if not smartmonitor_runtime.is_enabled():
+        if smartmonitor_runtime.is_enabled():
+            smartmonitor_runtime.stop(timeout=3.0)
+            try:
+                display.lcd.closeSerial()
+            except Exception:
+                pass
+        else:
             # Waiting for all pending request to be sent to display
             wait_for_empty_queue(5)
-        else:
-            display.lcd.closeSerial()
 
         # Remove tray icon just before exit
         if tray_icon:
-            tray_icon.visible = False
+            try:
+                tray_icon.stop()
+            except Exception:
+                try:
+                    tray_icon.visible = False
+                except Exception:
+                    pass
 
         # We force the exit to avoid waiting for other scheduled tasks: they may have a long delay!
         try:

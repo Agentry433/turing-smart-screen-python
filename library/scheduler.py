@@ -42,6 +42,7 @@ def async_job(threadname=None):
         def async_func(*args, **kwargs):
             """ create an asynchronous function to wrap around our thread """
             func_hl = threading.Thread(target=func, name=threadname, args=args, kwargs=kwargs)
+            func_hl.daemon = True
             func_hl.start()
             return func_hl
 

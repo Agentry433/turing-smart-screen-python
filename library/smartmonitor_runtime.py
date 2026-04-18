@@ -18,6 +18,7 @@ _LAST_VALID_VALUES: dict[str, int] = {}
 _RUNTIME_READY = True
 _RUNTIME_DISABLED_REASON: str | None = None
 _DISK_IO_SAMPLE: tuple[float, float] | None = None
+_RUNTIME_THREADS: list[threading.Thread] = []
 _THEME_DEFAULT_TAGS: dict[str, dict[str, int]] = {
     "theme_science fiction.dat": {
         "CPU_PERCENT": 3,
@@ -585,6 +586,7 @@ def _metrics_worker():
 
 
 def start():
+    global _RUNTIME_THREADS
     if not _RUNTIME_READY:
         if _RUNTIME_DISABLED_REASON:
             logger.warning("SmartMonitor runtime workers are disabled: %s", _RUNTIME_DISABLED_REASON)
@@ -594,8 +596,22 @@ def start():
 
     logger.info("Starting SmartMonitor HID runtime mode")
 
-    time_thread = threading.Thread(target=_time_worker, name="SmartMonitor_Time", daemon=False)
-    metrics_thread = threading.Thread(target=_metrics_worker, name="SmartMonitor_Metrics", daemon=False)
+    time_thread = threading.Thread(target=_time_worker, name="SmartMonitor_Time", daemon=True)
+    metrics_thread = threading.Thread(target=_metrics_worker, name="SmartMonitor_Metrics", daemon=True)
     time_thread.start()
     metrics_thread.start()
-    return [time_thread, metrics_thread]
+    _RUNTIME_THREADS = [time_thread, metrics_thread]
+    return list(_RUNTIME_THREADS)
+
+
+def stop(timeout: float = 3.0):
+    import library.scheduler as scheduler
+
+    scheduler.STOPPING = True
+    deadline = time.monotonic() + max(0.0, timeout)
+    for thread in list(_RUNTIME_THREADS):
+        remaining = max(0.0, deadline - time.monotonic())
+        if remaining <= 0:
+            break
+        if thread.is_alive():
+            thread.join(remaining)
