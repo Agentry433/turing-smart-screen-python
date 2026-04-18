@@ -54,12 +54,20 @@ def copy_default(default, theme):
 
 def load_theme():
     global THEME_DATA
+    theme_path = Path("res/themes/" + CONFIG_DATA['config']['THEME'])
     try:
-        theme_path = Path("res/themes/" + CONFIG_DATA['config']['THEME'])
         logger.info("Loading theme %s from %s" % (CONFIG_DATA['config']['THEME'], theme_path / "theme.yaml"))
         THEME_DATA = load_yaml(MAIN_DIRECTORY / theme_path / "theme.yaml")
         THEME_DATA['PATH'] = str(MAIN_DIRECTORY / theme_path) + "/"
     except:
+        if CONFIG_DATA.get("display", {}).get("REVISION") == "A_HID":
+            logger.warning(
+                "Classic YAML theme '%s' is not available in this package; using default fallback for SmartMonitor HID mode",
+                CONFIG_DATA['config']['THEME'],
+            )
+            THEME_DATA = dict(THEME_DEFAULT)
+            THEME_DATA['PATH'] = str(MAIN_DIRECTORY / "res/themes") + "/"
+            return
         logger.error("Theme not found or contains errors!")
         try:
             sys.exit(0)
