@@ -23,6 +23,7 @@
 import os
 import queue
 import sys
+import copy
 from pathlib import Path
 import yaml
 
@@ -65,7 +66,16 @@ def load_theme():
                 "Classic YAML theme '%s' is not available in this package; using default fallback for SmartMonitor HID mode",
                 CONFIG_DATA['config']['THEME'],
             )
-            THEME_DATA = dict(THEME_DEFAULT)
+            THEME_DATA = {
+                "display": {
+                    "DISPLAY_ORIENTATION": "portrait",
+                    "DISPLAY_SIZE": '3.5"',
+                    "DISPLAY_RGB_LED": (255, 255, 255),
+                },
+                "static_images": {},
+                "static_text": {},
+            }
+            copy_default(copy.deepcopy(THEME_DEFAULT), THEME_DATA)
             THEME_DATA['PATH'] = str(MAIN_DIRECTORY / "res/themes") + "/"
             return
         logger.error("Theme not found or contains errors!")
