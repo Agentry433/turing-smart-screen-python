@@ -1,6 +1,6 @@
 config:
   COM_PORT: AUTO
-  THEME: Advanced Radials Test
+  THEME: default
   HW_SENSORS: AUTO
   ETH: ''
   WLO: ''
