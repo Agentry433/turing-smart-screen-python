@@ -2,6 +2,10 @@
 
 `turing-smart-screen-python-HIDdev` is a modified fork of `turing-smart-screen-python` with added support for 3.5" SmartMonitor devices that appear on Linux as USB HID (`0483:0065`) instead of serial/TTY displays.
 
+Based on the original project:
+
+- https://github.com/mathoudebine/turing-smart-screen-python
+
 ## Features
 
 - Linux `hidraw` backend for SmartMonitor
@@ -56,6 +60,10 @@ See [LICENSE](./LICENSE).
 ## Russian Documentation
 
 Russian overview and usage notes are available in [README_RU.md](./README_RU.md).
+
+## Changelog
+
+Release history is available in [CHANGELOG.md](./CHANGELOG.md).
 
 ## 💰 Support the Project
 
